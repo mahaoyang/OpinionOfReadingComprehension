@@ -34,25 +34,28 @@ with open(PATH + VALIODATION, 'r', encoding='utf-8') as f:
 
 all_words = set()
 alternatives = []
-passage = []
-query = []
+passages = []
+querys = []
 for i in train:
     i = json.loads(i)
-    alternatives.append([' '.join(jieba.cut(ii, cut_all=True, HMM=False)) for ii in i.get('alternatives').split('|')])
-    passage.append(' '.join(jieba.cut(i.get('passage').replace(' ', ''), cut_all=True,
-                                      HMM=False)).replace('   ', ' ， ').replace('  ', ' 。 '))
+    alternative = [' '.join(jieba.cut(ii, cut_all=True, HMM=False)) for ii in i.get('alternatives').split('|')]
+    alternatives.append(alternative)
+    passage = ' '.join(jieba.cut(i.get('passage').replace(' ', ''), cut_all=True,
+                                 HMM=False)).replace('   ', ' ， ').replace('  ', ' 。 ')
+    passages.append(passage)
 
     if len(passage.split(' ')) > 300:
         trs = TextRank4Sentence()
         trs.analyze(text=i.get('passage').replace(' ', ''), lower=True, source='all_filters')
-        passage.append(' '.join(
+        passages.append(' '.join(
             jieba.cut('。'.join([i.sentence for i in trs.get_key_sentences(1)])[0:300], cut_all=True,
                       HMM=False)).replace('   ', ' ， ').replace('  ', ' 。 '))
 
-    query.append(' '.join(jieba.cut(i.get('query').replace(' ', ''), cut_all=True,
-                                    HMM=False)).replace('   ', ' ').replace('  ', ''))
+    query = ' '.join(jieba.cut(i.get('query').replace(' ', ''), cut_all=True,
+                               HMM=False)).replace('   ', ' ').replace('  ', '')
+    querys.append(query)
 
-    for ii in alternatives:
+    for ii in alternative:
         ii = set(ii.split(' '))
         all_words |= ii
     all_words |= set(passage.split(' ')) | set(query.split(' '))
@@ -77,13 +80,13 @@ alternatives_idx = []
 for i in alternatives:
     alternatives_idx.append([token.texts_to_sequences(ii) for ii in i])
 
-passage_idx = []
-for i in passage:
-    passage_idx.append([token.texts_to_sequences(ii) for ii in i])
+passages_idx = []
+for i in passages:
+    passages_idx.append([token.texts_to_sequences(ii) for ii in i])
 
-query_idx = []
-for i in query:
-    query_idx.append([token.texts_to_sequences(ii) for ii in i])
+querys_idx = []
+for i in querys:
+    querys_idx.append([token.texts_to_sequences(ii) for ii in i])
 
 with open('index2word.pick', 'wb') as f:
     pickle.dump(index2word, f)
@@ -92,7 +95,7 @@ with open('alts.pick', 'wb') as f:
     pickle.dump(alternatives_idx, f)
 
 with open('pasg.pick', 'wb') as f:
-    pickle.dump(passage_idx, f)
+    pickle.dump(passages_idx, f)
 
 with open('query.pick', 'wb') as f:
-    pickle.dump(query_idx, f)
+    pickle.dump(querys_idx, f)
