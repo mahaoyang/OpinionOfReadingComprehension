@@ -1,3 +1,7 @@
+import os
+
+import numpy as np
+
 from keras import utils
 from keras import layers
 from keras import models
@@ -8,15 +12,24 @@ from attention import Position_Embedding, Attention
 
 MAX_ALT_NUM = 3
 MAX_AN_LENGTH = 60
-MAX_QUES_LENGTH = 29
-MAX_PASSAGE_LENGTH = 13452
+MAX_QUES_LENGTH = 30
+MAX_PASSAGE_LENGTH = 300
+MAX_WORD_INDEX = 30000
+
+GLOVE_DIR = 'C:/Users/99263/Downloads/oqmrc'
+
 
 
 def model():
     passage_input = layers.Input(shape=(MAX_PASSAGE_LENGTH,))
-    passage = Position_Embedding(passage_input)
+    passage = layers.Embedding(MAX_WORD_INDEX + 1,
+                               100,
+                               #  weights=[embedding_matrix],
+                               input_length=MAX_PASSAGE_LENGTH,
+                               trainable=False)(passage_input)
+    passage = Position_Embedding()(passage)
     question_input = layers.Input(shape=(MAX_QUES_LENGTH,))
-    question = Position_Embedding(question_input)
+    question = Position_Embedding()(question_input)
     alternatives_input = layers.Input(shape=(MAX_AN_LENGTH,))
 
     p_encoder = layers.Bidirectional(layers.LSTM(256))(passage)
