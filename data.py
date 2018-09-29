@@ -93,13 +93,13 @@ passages_idx = [sequence.pad_sequences(token.texts_to_sequences(ii), maxlen=MAX_
 querys_idx = [sequence.pad_sequences(token.texts_to_sequences(ii), maxlen=MAX_QUES_LENGTH) for ii in querys]
 
 with open('index2word.pick', 'wb') as f:
-    pickle.dump(index2word, f)
+    pickle.dump(np.array(index2word), f)
 
 with open('alts.pick', 'wb') as f:
-    pickle.dump(alternatives_idx, f)
-
-with open('pasg.pick', 'wb') as f:
-    pickle.dump(passages_idx, f)
+    pickle.dump(np.array(alternatives_idx), f)
 
 with open('query.pick', 'wb') as f:
-    pickle.dump(querys_idx, f)
+    pickle.dump(np.array(querys_idx), f)
+
+with open('pasg.pick', 'wb') as f:
+    pickle.dump(np.array(passages_idx), f)
