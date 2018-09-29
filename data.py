@@ -5,7 +5,7 @@ import random
 
 import jieba
 import numpy as np
-from keras.preprocessing import text
+from keras.preprocessing import text, sequence
 from textrank4zh import TextRank4Sentence
 
 random.seed(123)
@@ -15,6 +15,13 @@ PATH = 'C:/Users/99263/Downloads/oqmrc/'
 TRAIN = 'ai_challenger_oqmrc_trainingset.json'
 TEST = 'ai_challenger_oqmrc_validationset.json'
 VALIODATION = 'ai_challenger_oqmrc_validationset.json'
+
+MAX_ALT_NUM = 3
+MAX_AN_LENGTH = 60
+MAX_TRI_AN_LENGTH = 97
+MAX_QUES_LENGTH = 30
+MAX_PASSAGE_LENGTH = 300
+MAX_WORD_INDEX = 30000
 
 with open(PATH + TRAIN, 'r', encoding='utf-8') as f:
     train = f.readlines()
@@ -32,10 +39,11 @@ with open(PATH + VALIODATION, 'r', encoding='utf-8') as f:
     # np.random.shuffle(validation)
     # validation = validation.tolist()
 
-all_words = set()
+all_words = {'\n'}
 alternatives = []
 passages = []
 querys = []
+a = 0
 for i in train:
     i = json.loads(i)
     alternative = [' '.join(jieba.cut(ii, cut_all=True, HMM=False)) for ii in i.get('alternatives').split('|')]
@@ -78,15 +86,11 @@ word_vector = load_vectors()
 
 alternatives_idx = []
 for i in alternatives:
-    alternatives_idx.append([token.texts_to_sequences(ii) for ii in i])
+    alternatives_idx.append([sequence.pad_sequences(token.texts_to_sequences('\n'.join(i)), maxlen=MAX_TRI_AN_LENGTH)])
 
-passages_idx = []
-for i in passages:
-    passages_idx.append([token.texts_to_sequences(ii) for ii in i])
+passages_idx = [sequence.pad_sequences(token.texts_to_sequences(ii), maxlen=MAX_PASSAGE_LENGTH) for ii in passages]
 
-querys_idx = []
-for i in querys:
-    querys_idx.append([token.texts_to_sequences(ii) for ii in i])
+querys_idx = [sequence.pad_sequences(token.texts_to_sequences(ii), maxlen=MAX_QUES_LENGTH) for ii in querys]
 
 with open('index2word.pick', 'wb') as f:
     pickle.dump(index2word, f)

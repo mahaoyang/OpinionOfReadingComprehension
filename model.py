@@ -19,23 +19,33 @@ MAX_WORD_INDEX = 30000
 GLOVE_DIR = 'C:/Users/99263/Downloads/oqmrc'
 
 
-
 def model():
-    passage_input = layers.Input(shape=(MAX_PASSAGE_LENGTH,))
+    passage_input = layers.Input(shape=(MAX_PASSAGE_LENGTH,), dtype='int32')
     passage = layers.Embedding(MAX_WORD_INDEX + 1,
-                               100,
+                               300,
                                #  weights=[embedding_matrix],
                                input_length=MAX_PASSAGE_LENGTH,
                                trainable=False)(passage_input)
     passage = Position_Embedding()(passage)
     question_input = layers.Input(shape=(MAX_QUES_LENGTH,))
-    question = Position_Embedding()(question_input)
+    question = layers.Embedding(MAX_WORD_INDEX + 1,
+                                300,
+                                #  weights=[embedding_matrix],
+                                input_length=MAX_PASSAGE_LENGTH,
+                                trainable=False)(question_input)
+    question = Position_Embedding()(question)
     alternatives_input = layers.Input(shape=(MAX_AN_LENGTH,))
+    alternatives = layers.Embedding(MAX_WORD_INDEX + 1,
+                                    300,
+                                    #  weights=[embedding_matrix],
+                                    input_length=MAX_PASSAGE_LENGTH,
+                                    trainable=False)(alternatives_input)
 
-    p_encoder = layers.Bidirectional(layers.LSTM(256))(passage)
-    q_encoder = layers.Bidirectional(layers.LSTM(256))(question)
+    p_encoder = layers.Bidirectional(layers.LSTM(256, return_sequences=True))(passage)
+    q_encoder = layers.Bidirectional(layers.LSTM(256, return_sequences=True))(question)
 
-    a_decoder = Attention(8, 16)(p_encoder, q_encoder, alternatives_input)
+    a_decoder = Attention(8, 16)([p_encoder, q_encoder, alternatives])
+    a_decoder = layers.Flatten()(a_decoder)
     a_decoder = layers.Concatenate()([a_decoder, alternatives_input])
 
     output_alt = layers.Dense(MAX_ALT_NUM)(a_decoder)
