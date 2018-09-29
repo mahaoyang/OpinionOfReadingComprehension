@@ -1,3 +1,4 @@
 # coding=gbk
-# from model import model
-# from data import train, test, validation
+import pickle
+from model import model
+
