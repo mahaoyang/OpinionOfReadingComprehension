@@ -25,19 +25,19 @@ MAX_WORD_INDEX = 30000
 
 with open(PATH + TRAIN, 'r', encoding='utf-8') as f:
     train = f.readlines()
-    # train = np.array(train)
-    # np.random.shuffle(train)
-    # train = train.tolist()
+    train = np.array(train)
+    np.random.shuffle(train)
+    train = train.tolist()
 with open(PATH + TEST, 'r', encoding='utf-8') as f:
     test = f.readlines()
-    # test = np.array(test)
-    # np.random.shuffle(test)
-    # test = test.tolist()
+    test = np.array(test)
+    np.random.shuffle(test)
+    test = test.tolist()
 with open(PATH + VALIODATION, 'r', encoding='utf-8') as f:
     validation = f.readlines()
-    # validation = np.array(validation)
-    # np.random.shuffle(validation)
-    # validation = validation.tolist()
+    validation = np.array(validation)
+    np.random.shuffle(validation)
+    validation = validation.tolist()
 
 all_words = {'\n'}
 alternatives = []

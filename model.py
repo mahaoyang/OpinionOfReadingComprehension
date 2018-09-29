@@ -12,6 +12,7 @@ from attention import Position_Embedding, Attention
 
 MAX_ALT_NUM = 3
 MAX_AN_LENGTH = 60
+MAX_TRI_AN_LENGTH = 97
 MAX_QUES_LENGTH = 30
 MAX_PASSAGE_LENGTH = 300
 MAX_WORD_INDEX = 30000
@@ -34,7 +35,7 @@ def model():
                                 input_length=MAX_PASSAGE_LENGTH,
                                 trainable=False)(question_input)
     question = Position_Embedding()(question)
-    alternatives_input = layers.Input(shape=(MAX_AN_LENGTH,))
+    alternatives_input = layers.Input(shape=(MAX_TRI_AN_LENGTH,))
     alternatives = layers.Embedding(MAX_WORD_INDEX + 1,
                                     300,
                                     #  weights=[embedding_matrix],
