@@ -81,42 +81,52 @@ def tr():
     token = text.Tokenizer()
     token.fit_on_texts(all_words)
     index2word = token.index_word
-
-    def load_vectors(fname='cc.zh.300.vec'):
-        fin = io.open(fname, 'r', encoding='utf-8', newline='\n', errors='ignore')
-        data = dict()
-        for line in fin:
-            tokens = line.rstrip().split(' ')
-            data[tokens[0]] = np.array([float(i) for i in tokens[1:]])
-        return data
-
-    #  word_vector = load_vectors()
+    word2index = token.word_index
 
     alternatives_idx = []
     for i in alternatives:
         alternatives_idx.append(
             [sequence.pad_sequences(token.texts_to_sequences('\n'.join(i)), maxlen=MAX_TRI_AN_LENGTH)])
 
-    passages_idx = [sequence.pad_sequences(token.texts_to_sequences(ii), maxlen=MAX_PASSAGE_LENGTH).tolist() for ii in
+    passages_idx = [sequence.pad_sequences(token.texts_to_sequences(ii), maxlen=MAX_PASSAGE_LENGTH) for ii in
                     passages]
 
     querys_idx = [sequence.pad_sequences(token.texts_to_sequences(ii), maxlen=MAX_QUES_LENGTH) for ii in querys]
 
     with open('index2word.pick', 'wb') as f:
         pickle.dump(index2word, f)
-        del index2word
+
+    with open('word2index.pick', 'wb') as f:
+        pickle.dump(word2index, f)
 
     with open('alts.pick', 'wb') as f:
         pickle.dump(np.array(alternatives_idx), f)
-        del alternatives_idx
 
     with open('query.pick', 'wb') as f:
         pickle.dump(np.array(querys_idx), f)
-        del querys_idx
 
     for iii in passages_idx:
-        with open('pasg', 'a+') as f:
-            f.write('%s\n' % iii)
+        with open('pasg.txt', 'a+') as f:
+            f.write('%s\n' % iii.tolist())
+
+
+def load_vectors(fname='cc.zh.300.vec'):
+    fin = io.open(fname, 'r', encoding='utf-8', newline='\n', errors='ignore')
+    data = dict()
+    for line in fin:
+        tokens = line.rstrip().split(' ')
+        data[tokens[0]] = np.asarray(tokens[1:], dtype='float32')
+    return data
+
+
+def ebd_matrix(embeddings_index, index2word, EMBEDDING_DIM):
+    embedding_matrix = np.zeros((len(index2word) + 1, EMBEDDING_DIM))
+    for i, word in index2word.items():
+        embedding_vector = embeddings_index.get(word)
+        if embedding_vector is not None:
+            # words not found in embedding index will be all-zeros.
+            embedding_matrix[i] = embedding_vector
+    return embedding_matrix
 
 
 if __name__ == '__main__':
