@@ -63,11 +63,11 @@ def tr():
                                      HMM=False)).replace('   ', ' ， ').replace('  ', ' 。 ')
         passages.append(passage)
 
-        if len(passage.split(' ')) > 300:
+        if len(passage.split(' ')) > 100:
             trs = TextRank4Sentence()
             trs.analyze(text=i.get('passage').replace(' ', ''), lower=True, source='all_filters')
             passages.append(' '.join(
-                jieba.cut('。'.join([i.sentence for i in trs.get_key_sentences(1)])[0:300], cut_all=True,
+                jieba.cut('。'.join([i.sentence for i in trs.get_key_sentences(1)])[0:100], cut_all=True,
                           HMM=False)).replace('   ', ' ， ').replace('  ', ' 。 '))
 
         query = ' '.join(jieba.cut(i.get('query').replace(' ', ''), cut_all=True,
@@ -118,6 +118,7 @@ def tr():
     for iii in passages_idx:
         with open('pasg.txt', 'a+') as f:
             f.write('%s\n' % iii.tolist())
+    print('passages_idx : %s' % len(passages_idx))
 
 
 def load_vectors(fname='cc.zh.300.vec'):
