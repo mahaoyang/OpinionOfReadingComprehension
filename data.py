@@ -53,6 +53,7 @@ def tr():
     alternatives = []
     passages = []
     querys = []
+    answers = []
     train = pickle.load(open('train_shuffle', 'rb'))
     for i in train:
         i = json.loads(i)
@@ -72,6 +73,10 @@ def tr():
         query = ' '.join(jieba.cut(i.get('query').replace(' ', ''), cut_all=True,
                                    HMM=False)).replace('   ', ' ').replace('  ', '')
         querys.append(query)
+
+        answer = ' '.join(jieba.cut(i.get('answer').replace(' ', ''), cut_all=True,
+                                    HMM=False)).replace('   ', ' ').replace('  ', '')
+        answers.append(answer)
 
         for ii in alternative:
             ii = set(ii.split(' '))
@@ -93,6 +98,8 @@ def tr():
 
     querys_idx = [sequence.pad_sequences(token.texts_to_sequences(ii), maxlen=MAX_QUES_LENGTH) for ii in querys]
 
+    answer_idx = [sequence.pad_sequences(token.texts_to_sequences(ii), maxlen=MAX_QUES_LENGTH) for ii in answers]
+
     with open('index2word.pick', 'wb') as f:
         pickle.dump(index2word, f)
 
@@ -104,6 +111,9 @@ def tr():
 
     with open('query.pick', 'wb') as f:
         pickle.dump(np.array(querys_idx), f)
+
+    with open('answer.pick', 'wb') as f:
+        pickle.dump(np.array(answer_idx), f)
 
     for iii in passages_idx:
         with open('pasg.txt', 'a+') as f:
@@ -128,6 +138,19 @@ def ebd_matrix(embeddings_index, index2word, EMBEDDING_DIM):
             embedding_matrix[i] = embedding_vector
     return embedding_matrix
 
+
+# ii = np.asarray([w2v[index2word[iii]] for iii in pasg[r]], dtype='float32')
+# p.append(ii)
+#
+# ii = np.asarray([w2v[index2word[iii]] for iii in query[r]], dtype='float32')
+# q.append(ii)
+#
+# for iii in alts[r]:
+#     ii = np.asarray([w2v[index2word[iiii]] for iiii in iii], dtype='float32')
+#     a.append(ii)
+#
+# ii = np.asarray([w2v[index2word[iii]] for iii in answer[r]], dtype='float32')
+# an.append(ii)
 
 if __name__ == '__main__':
     tr()

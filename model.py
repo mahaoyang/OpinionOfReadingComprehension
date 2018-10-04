@@ -17,7 +17,7 @@ MAX_AN_LENGTH = 60
 MAX_TRI_AN_LENGTH = 97
 MAX_QUES_LENGTH = 30
 MAX_PASSAGE_LENGTH = 300
-MAX_WORD_INDEX = 30000
+MAX_WORD_INDEX = 175749
 
 GLOVE_DIR = 'C:/Users/99263/Downloads/oqmrc'
 
@@ -65,6 +65,3 @@ def model():
 
     rc_model.summary()
     return rc_model
-
-
-model()
