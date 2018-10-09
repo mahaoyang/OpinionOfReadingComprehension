@@ -163,20 +163,19 @@ def ebd_matrix(embeddings_index, index2word, EMBEDDING_DIM):
 # ii = np.asarray([w2v[index2word[iii]] for iii in answer[r]], dtype='float32')
 # an.append(ii)
 
+train = pickle.load(open('token.pick', 'rb'))
+token = train[0]
+alternatives = train[1]
+passages = train[2]
+querys = train[3]
+answers = train[4]
+
 
 def train(index):
-    train = pickle.load(open('token.pick', 'rb'))
-    token = train[0]
-    alternatives = train[1]
-    passages = train[2]
-    querys = train[3]
-    answers = train[4]
-    alternatives_idx = []
+    alternatives_idx = \
+        [sequence.pad_sequences(token.texts_to_sequences(alternatives[index]), maxlen=MAX_TRI_AN_LENGTH)][0][0]
 
-    alternatives_idx.append(
-        [sequence.pad_sequences(token.texts_to_sequences(alternatives[index]), maxlen=MAX_TRI_AN_LENGTH)])
-
-    passages_idx = sequence.pad_sequences(token.texts_to_sequences(passages[index]), maxlen=MAX_PASSAGE_LENGTH)[0][0]
+    passages_idx = sequence.pad_sequences(token.texts_to_sequences(passages[index]), maxlen=MAX_PASSAGE_LENGTH)
 
     querys_idx = sequence.pad_sequences(token.texts_to_sequences(querys[index]), maxlen=MAX_QUES_LENGTH)
 
