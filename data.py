@@ -55,20 +55,25 @@ def tr():
     querys = []
     answers = []
     train = pickle.load(open('train_shuffle', 'rb'))
+    n = 0
     for i in train:
+        n += 1
+        if n > 1001:
+            break
         i = json.loads(i)
         alternative = [' '.join(jieba.cut(ii, cut_all=True, HMM=False)) for ii in i.get('alternatives').split('|')]
         alternatives.append(alternative)
         passage = ' '.join(jieba.cut(i.get('passage').replace(' ', ''), cut_all=True,
                                      HMM=False)).replace('   ', ' ， ').replace('  ', ' 。 ')
-        passages.append(passage)
 
-        if len(passage.split(' ')) > 100:
+        if len(passage.split(' ')) > 300:
             trs = TextRank4Sentence()
             trs.analyze(text=i.get('passage').replace(' ', ''), lower=True, source='all_filters')
             passages.append(' '.join(
-                jieba.cut('。'.join([i.sentence for i in trs.get_key_sentences(1)])[0:100], cut_all=True,
+                jieba.cut('。'.join([i.sentence for i in trs.get_key_sentences(1)])[0:300], cut_all=True,
                           HMM=False)).replace('   ', ' ， ').replace('  ', ' 。 '))
+        else:
+            passages.append(passage)
 
         query = ' '.join(jieba.cut(i.get('query').replace(' ', ''), cut_all=True,
                                    HMM=False)).replace('   ', ' ').replace('  ', '')
@@ -85,40 +90,45 @@ def tr():
 
     token = text.Tokenizer()
     token.fit_on_texts(all_words)
-    index2word = token.index_word
-    word2index = token.word_index
 
-    alternatives_idx = []
-    for i in alternatives:
-        alternatives_idx.append(
-            [sequence.pad_sequences(token.texts_to_sequences('\n'.join(i)), maxlen=MAX_TRI_AN_LENGTH)])
+    with open('token.pick', 'wb') as f:
+        pickle.dump([token, alternatives, passages, querys, answers], f)
 
-    passages_idx = [sequence.pad_sequences(token.texts_to_sequences(ii), maxlen=MAX_PASSAGE_LENGTH) for ii in
-                    passages]
+    # index2word = token.index_word
+    # word2index = token.word_index
 
-    querys_idx = [sequence.pad_sequences(token.texts_to_sequences(ii), maxlen=MAX_QUES_LENGTH) for ii in querys]
-
-    answer_idx = [sequence.pad_sequences(token.texts_to_sequences(ii), maxlen=MAX_QUES_LENGTH) for ii in answers]
-
-    with open('index2word.pick', 'wb') as f:
-        pickle.dump(index2word, f)
-
-    with open('word2index.pick', 'wb') as f:
-        pickle.dump(word2index, f)
-
-    with open('alts.pick', 'wb') as f:
-        pickle.dump(np.array(alternatives_idx), f)
-
-    with open('query.pick', 'wb') as f:
-        pickle.dump(np.array(querys_idx), f)
-
-    with open('answer.pick', 'wb') as f:
-        pickle.dump(np.array(answer_idx), f)
-
-    for iii in passages_idx:
-        with open('pasg.txt', 'a+') as f:
-            f.write('%s\n' % iii.tolist())
-    print('passages_idx : %s' % len(passages_idx))
+    # alternatives_idx = []
+    # for i in alternatives:
+    #     alternatives_idx.append([sequence.pad_sequences(token.texts_to_sequences(i), maxlen=MAX_TRI_AN_LENGTH)])
+    #
+    # passages_idx = sequence.pad_sequences(token.texts_to_sequences(passages), maxlen=MAX_PASSAGE_LENGTH)
+    #
+    # querys_idx = sequence.pad_sequences(token.texts_to_sequences(querys), maxlen=MAX_QUES_LENGTH)
+    #
+    # answer_idx = sequence.pad_sequences(token.texts_to_sequences(answers), maxlen=MAX_AN_LENGTH)
+    #
+    # with open('index2word.pick', 'wb') as f:
+    #     pickle.dump(index2word, f)
+    #
+    # with open('word2index.pick', 'wb') as f:
+    #     pickle.dump(word2index, f)
+    #
+    # with open('alts.pick', 'wb') as f:
+    #     pickle.dump(np.array(alternatives_idx), f)
+    #
+    # with open('query.pick', 'wb') as f:
+    #     pickle.dump(np.array(querys_idx), f)
+    #
+    # with open('answer.pick', 'wb') as f:
+    #     pickle.dump(np.array(answer_idx), f)
+    #
+    # with open('passages.pick', 'wb') as f:
+    #     pickle.dump(np.array(passages_idx), f)
+    #
+    # # for iii in passages_idx:
+    # #     with open('pasg.txt', 'a+') as f:
+    # #         f.write('%s\n' % iii.tolist())
+    # print('passages_idx : %s' % len(passages_idx))
 
 
 def load_vectors(fname='cc.zh.300.vec'):
@@ -153,5 +163,28 @@ def ebd_matrix(embeddings_index, index2word, EMBEDDING_DIM):
 # ii = np.asarray([w2v[index2word[iii]] for iii in answer[r]], dtype='float32')
 # an.append(ii)
 
+
+def train(index):
+    train = pickle.load(open('token.pick', 'rb'))
+    token = train[0]
+    alternatives = train[1]
+    passages = train[2]
+    querys = train[3]
+    answers = train[4]
+    alternatives_idx = []
+
+    alternatives_idx.append(
+        [sequence.pad_sequences(token.texts_to_sequences(alternatives[index]), maxlen=MAX_TRI_AN_LENGTH)])
+
+    passages_idx = sequence.pad_sequences(token.texts_to_sequences(passages[index]), maxlen=MAX_PASSAGE_LENGTH)[0][0]
+
+    querys_idx = sequence.pad_sequences(token.texts_to_sequences(querys[index]), maxlen=MAX_QUES_LENGTH)
+
+    answer_idx = sequence.pad_sequences(token.texts_to_sequences(answers[index]), maxlen=MAX_AN_LENGTH)
+
+    return alternatives_idx, passages_idx, querys_idx, answer_idx
+
+
 if __name__ == '__main__':
-    tr()
+    # tr()
+    train(2)

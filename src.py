@@ -3,35 +3,51 @@ import pickle
 import random
 import numpy as np
 from model import model
-from data import load_vectors
+from data import load_vectors, train
 
-with open('pasg.txt', 'r') as f:
-    pasg = f.readlines()
-    print('pasg length : %s' % len(pasg))
-with open('query.pick', 'rb') as f:
-    query = pickle.load(f)
-with open('alts.pick', 'rb') as f:
-    alts = pickle.load(f)
+# with open('pasg.txt', 'r') as f:
+#     pasg = f.readline()
+#     print('pasg length : %s' % len(pasg))
 
-with open('answer.pick', 'rb') as f:
-    answer = pickle.load(f)
+# with open('index2word.pick', 'rb') as f:
+#     index2word = pickle.load(f)
+#     print(len(index2word))
+# with open('passages.pick', 'rb') as f:
+#     pasg = pickle.load(f)
+# with open('query.pick', 'rb') as f:
+#     query = pickle.load(f)
+# with open('alts.pick', 'rb') as f:
+#     alts = pickle.load(f)
+#
+# with open('answer.pick', 'rb') as f:
+#     answer = pickle.load(f)
+
+size = 1000
 
 
-def dgen(batch_size=32):
+def dgen(batch_size=2):
     while 1:
         p, q, a, an = [], [], [], []
         for i in range(batch_size):
-            r = random.randint(0, len(pasg))
-            p.append(eval(pasg[r]))
-            q.append(query[r])
-            for i in alts[r]:
-                a.extend(i)
-            an.append(answer[r])
-        p = np.asarray(p, dtype='float32')
-        q = np.array(p)
+            r = random.randint(0, size)
+            train_ = train(r)
+            p.append(train_[1])
+            q.append(train_[2])
+
+            # a_t = []
+            # for ii in train_[0]:
+            #     for iii in ii:
+            #         a_t.extend(iii)
+            # a.append(a_t)
+
+            a.append(train_[0])
+            an.append(train_[3])
+        p = np.array(p)
+        q = np.array(q)
         a = np.array(a)
-        a = np.array(an)
-        yield [p, q, a], [a, an]
+        an = np.array(an)
+        print(p.shape, q.shape, a.shape, an.shape)
+        yield ([p, q, a], [a, an])
 
 
 model = model()
