@@ -173,13 +173,13 @@ answers = train[4]
 
 def train(index):
     alternatives_idx = \
-        [sequence.pad_sequences(token.texts_to_sequences(alternatives[index]), maxlen=MAX_TRI_AN_LENGTH)][0][0]
+        sequence.pad_sequences(token.texts_to_sequences(alternatives[index]), maxlen=MAX_TRI_AN_LENGTH)
 
-    passages_idx = sequence.pad_sequences(token.texts_to_sequences(passages[index]), maxlen=MAX_PASSAGE_LENGTH)
+    passages_idx = sequence.pad_sequences(token.texts_to_sequences([passages[index]]), maxlen=MAX_PASSAGE_LENGTH)[0]
 
-    querys_idx = sequence.pad_sequences(token.texts_to_sequences(querys[index]), maxlen=MAX_QUES_LENGTH)
+    querys_idx = sequence.pad_sequences(token.texts_to_sequences([querys[index]]), maxlen=MAX_QUES_LENGTH)[0]
 
-    answer_idx = sequence.pad_sequences(token.texts_to_sequences(answers[index]), maxlen=MAX_AN_LENGTH)
+    answer_idx = sequence.pad_sequences(token.texts_to_sequences([answers[index]]), maxlen=MAX_AN_LENGTH)[0]
 
     return alternatives_idx, passages_idx, querys_idx, answer_idx
 

@@ -31,8 +31,8 @@ def dgen(batch_size=2):
         for i in range(batch_size):
             r = random.randint(0, size)
             train_ = train(r)
-            p.append(train_[1])
-            q.append(train_[2])
+            p.append(train_[1].tolist())
+            q.append(train_[2].tolist())
 
             # a_t = []
             # for ii in train_[0]:
@@ -40,8 +40,11 @@ def dgen(batch_size=2):
             #         a_t.extend(iii)
             # a.append(a_t)
 
-            a.append(train_[0])
-            an.append(train_[3])
+            a_t = []
+            for ii in train_[0].tolist():
+                a_t.extend(ii)
+            a.append(a_t)
+            an.append(train_[3].tolist())
         p = np.array(p)
         q = np.array(q)
         a = np.array(a)
