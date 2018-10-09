@@ -55,15 +55,18 @@ def model():
     q_encoder = layers.Bidirectional(layers.LSTM(256, return_sequences=True))(question)
 
     alt_encoder = layers.MaxPooling1D()(alt_encoder)
+    alt_encoder = layers.Flatten()(alt_encoder)
     p_encoder = layers.MaxPooling1D()(p_encoder)
+    p_encoder = layers.Flatten()(p_encoder)
     q_encoder = layers.MaxPooling1D()(q_encoder)
+    q_encoder = layers.Flatten()(q_encoder)
 
-    # a_decoder = layers.Concatenate()([p_encoder, q_encoder, alt_encoder])
-    a_decoder = Attention(1, 4)([p_encoder, q_encoder, alt_encoder])
+    a_decoder = layers.Concatenate()([p_encoder, q_encoder, alt_encoder])
+    # a_decoder = Attention(1, 4)([p_encoder, q_encoder, alt_encoder])
     # a_decoder = layers.Flatten()(a_decoder)
     # alternatives_input = layers.Flatten()(alternatives_input)
     # a_decoder = layers.Concatenate()([a_decoder, alternatives_input])
-    a_decoder = layers.GlobalMaxPooling1D()(a_decoder)
+    # a_decoder = layers.GlobalMaxPooling1D()(a_decoder)
 
     output_alt = layers.Dense(MAX_TRI_AN_LENGTH * 3)(a_decoder)
     output = layers.Dense(60, activation='softmax')(a_decoder)
@@ -74,3 +77,4 @@ def model():
 
     rc_model.summary()
     return rc_model
+model()
