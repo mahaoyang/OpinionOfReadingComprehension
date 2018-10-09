@@ -31,21 +31,21 @@ def model():
     passage_input = layers.Input(shape=(MAX_PASSAGE_LENGTH,), dtype='int32')
     passage = layers.Embedding(MAX_WORD_INDEX + 1,
                                300,
-                               # weights=[embedding_matrix],
+                               weights=[embedding_matrix],
                                input_length=MAX_PASSAGE_LENGTH,
                                trainable=False)(passage_input)
     passage = Position_Embedding()(passage)
     question_input = layers.Input(shape=(MAX_QUES_LENGTH,))
     question = layers.Embedding(MAX_WORD_INDEX + 1,
                                 300,
-                                # weights=[embedding_matrix],
+                                weights=[embedding_matrix],
                                 input_length=MAX_PASSAGE_LENGTH,
                                 trainable=False)(question_input)
     question = Position_Embedding()(question)
     alternatives_input = layers.Input(shape=(MAX_TRI_AN_LENGTH * 3,))
     alternatives = layers.Embedding(MAX_WORD_INDEX + 1,
                                     300,
-                                    # weights=[embedding_matrix],
+                                    weights=[embedding_matrix],
                                     input_length=MAX_PASSAGE_LENGTH,
                                     trainable=False)(alternatives_input)
     alternatives = layers.Flatten()(alternatives)
